@@ -500,31 +500,44 @@
             const corner = document.createElement('div');
             corner.className = 'team-label corner';
             corner.textContent = '🏈';
+            corner.style.gridColumn = '1';
+            corner.style.gridRow = '1';
             grid.appendChild(corner);
 
             const team1Header = document.createElement('div');
             team1Header.className = 'team-header top';
             team1Header.textContent = gameState.team1Name;
+            // Will span based on CSS
             grid.appendChild(team1Header);
 
-            // === ROW 2: Team 2 starts + (spacer if numbers assigned) + Column Letters A-J ===
+            // === ROW 2: Team 2 header + Column Letters A-J ===
             const team2Header = document.createElement('div');
             team2Header.className = 'team-header left';
             team2Header.textContent = gameState.team2Name;
+            // Will span based on CSS
             grid.appendChild(team2Header);
 
-            // Only add spacer if numbers are assigned
+            // Spacer only if numbers are assigned
             if (gameState.numbersAssigned) {
                 const spacer2 = document.createElement('div');
                 spacer2.className = 'team-label';
                 spacer2.style.background = '#0f172a';
+                spacer2.style.gridColumn = '2';
+                spacer2.style.gridRow = '2';
                 grid.appendChild(spacer2);
             }
 
+            // Column labels A-J
             for (let col = 0; col < 10; col++) {
                 const colLabel = document.createElement('div');
                 colLabel.className = 'team-label';
                 colLabel.textContent = columnLabels[col];
+                if (gameState.numbersAssigned) {
+                    colLabel.style.gridColumn = (col + 3).toString();
+                } else {
+                    colLabel.style.gridColumn = (col + 2).toString();
+                }
+                colLabel.style.gridRow = '2';
                 grid.appendChild(colLabel);
             }
 
@@ -533,33 +546,42 @@
                 const spacer3 = document.createElement('div');
                 spacer3.className = 'number-cell';
                 spacer3.style.background = '#0f172a';
+                spacer3.style.gridColumn = '2';
+                spacer3.style.gridRow = '3';
                 grid.appendChild(spacer3);
 
                 for (let col = 0; col < 10; col++) {
                     const numCell = document.createElement('div');
                     numCell.className = 'number-cell';
                     numCell.textContent = gameState.colNumbers[col];
+                    numCell.style.gridColumn = (col + 3).toString();
+                    numCell.style.gridRow = '3';
                     grid.appendChild(numCell);
                 }
             }
 
-            // === ROWS 4-13: Row Label + (Number if assigned) + 10 Squares ===
+            // === ROWS 3-12: Each row has Row Label + (Number if assigned) + 10 Squares ===
             for (let row = 0; row < 10; row++) {
-                // Row number label (1-10)
+                // Only add row label and number for first column
+                // Row number label (1-10) - always in column 1
                 const rowLabel = document.createElement('div');
                 rowLabel.className = 'team-label';
                 rowLabel.textContent = row + 1;
+                rowLabel.style.gridColumn = '1';
+                rowLabel.style.gridRow = (row + 3).toString();
                 grid.appendChild(rowLabel);
 
-                // Assigned row number (only if numbers assigned)
+                // Assigned row number (only if numbers assigned) - in column 2
                 if (gameState.numbersAssigned) {
                     const numCell = document.createElement('div');
                     numCell.className = 'number-cell';
                     numCell.textContent = gameState.rowNumbers[row];
+                    numCell.style.gridColumn = '2';
+                    numCell.style.gridRow = (row + 3).toString();
                     grid.appendChild(numCell);
                 }
 
-                // 10 squares
+                // 10 squares - columns start at 2 (or 3 if numbers assigned)
                 for (let col = 0; col < 10; col++) {
                     const index = row * 10 + col;
                     const square = document.createElement('div');
@@ -572,6 +594,15 @@
                     }
                     
                     square.onclick = () => claimSquare(index);
+                    
+                    // Place squares in correct columns
+                    if (gameState.numbersAssigned) {
+                        square.style.gridColumn = (col + 3).toString();
+                    } else {
+                        square.style.gridColumn = (col + 2).toString();
+                    }
+                    square.style.gridRow = (row + 3).toString();
+                    
                     grid.appendChild(square);
                 }
             }
