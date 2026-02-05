@@ -141,7 +141,7 @@
 
         .grid {
             display: grid;
-            grid-template-columns: 40px repeat(11, 70px);
+            grid-template-columns: 40px repeat(10, 70px);
             grid-template-rows: 40px 40px repeat(10, 70px);
         }
 
@@ -164,6 +164,11 @@
         }
 
         .team-header.top {
+            grid-column: 2 / -1;
+            grid-row: 1;
+        }
+
+        .grid.numbers-assigned .team-header.top {
             grid-column: 3 / -1;
             grid-row: 1;
         }
@@ -370,7 +375,11 @@
         @media (max-width: 768px) {
             .grid {
                 grid-template-columns: 40px repeat(10, 50px);
-                grid-template-rows: 40px repeat(10, 50px);
+                grid-template-rows: 40px 40px repeat(10, 50px);
+            }
+            .grid.numbers-assigned {
+                grid-template-columns: 40px 50px repeat(10, 50px);
+                grid-template-rows: 40px 40px 50px repeat(10, 50px);
             }
             .square {
                 font-size: 14px;
@@ -395,7 +404,7 @@
             
             <div style="display: flex; align-items: center; gap: 10px; margin-left: 20px; padding: 10px; background: white; border-radius: 6px;">
                 <input type="checkbox" id="adminMode" onchange="toggleAdminMode()">
-                <label for="adminMode" style="cursor: pointer; font-weight: 600;">Admin Mode</label>
+                <label for="adminMode" style="cursor: pointer; font-weight: 600;">Check box when ready to assign teams</label>
             </div>
         </div>
 
@@ -419,21 +428,20 @@
 
         <div id="status" class="status">Loading game data...</div>
 
+        <div class="info-section" style="margin-top: 0; margin-bottom: 25px;">
+            <h2>Instructions</h2>
+            <p style="color: #475569; line-height: 1.6;">
+                <strong>$5 per square, collected at the party.</strong><br>
+                1. Enter your initials and click "Claim Square" to pick your squares<br>
+                2. Once all squares are claimed, numbers will be assigned<br>
+                3. Winners determined by the last digit of each team's score at end of each quarter
+            </p>
+        </div>
+
         <div class="grid-wrapper">
             <div class="grid-container">
                 <div class="grid" id="grid"></div>
             </div>
-        </div>
-
-        <div class="info-section">
-            <h2>How to Play</h2>
-            <ol style="line-height: 1.8; color: #475569;">
-                <li>Enter your initials (2-4 characters) and click "Claim Square"</li>
-                <li>Click any empty square to claim it</li>
-                <li>Once all 100 squares are claimed, admin can click "Assign Numbers"</li>
-                <li>During the game, enter scores for each quarter to see who wins</li>
-                <li>Winners are determined by matching the last digit of each team's score</li>
-            </ol>
         </div>
 
         <div class="quarters" id="quarters"></div>
@@ -499,16 +507,19 @@
             team1Header.textContent = gameState.team1Name;
             grid.appendChild(team1Header);
 
-            // === ROW 2: Team 2 starts + empty + Column Letters A-J ===
+            // === ROW 2: Team 2 starts + (spacer if numbers assigned) + Column Letters A-J ===
             const team2Header = document.createElement('div');
             team2Header.className = 'team-header left';
             team2Header.textContent = gameState.team2Name;
             grid.appendChild(team2Header);
 
-            const spacer2 = document.createElement('div');
-            spacer2.className = 'team-label';
-            spacer2.style.background = '#0f172a';
-            grid.appendChild(spacer2);
+            // Only add spacer if numbers are assigned
+            if (gameState.numbersAssigned) {
+                const spacer2 = document.createElement('div');
+                spacer2.className = 'team-label';
+                spacer2.style.background = '#0f172a';
+                grid.appendChild(spacer2);
+            }
 
             for (let col = 0; col < 10; col++) {
                 const colLabel = document.createElement('div');
