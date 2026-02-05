@@ -141,6 +141,11 @@
 
         .grid {
             display: grid;
+            grid-template-columns: 40px repeat(11, 70px);
+            grid-template-rows: 40px 40px repeat(10, 70px);
+        }
+
+        .grid.numbers-assigned {
             grid-template-columns: 40px 60px repeat(10, 70px);
             grid-template-rows: 40px 40px 60px repeat(10, 70px);
         }
@@ -473,6 +478,13 @@
         function renderGrid() {
             const grid = document.getElementById('grid');
             grid.innerHTML = '';
+            
+            // Add class to change grid structure when numbers are assigned
+            if (gameState.numbersAssigned) {
+                grid.classList.add('numbers-assigned');
+            } else {
+                grid.classList.remove('numbers-assigned');
+            }
 
             const columnLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
 
@@ -505,23 +517,22 @@
                 grid.appendChild(colLabel);
             }
 
-            // === ROW 3: (Team 2 continues) + empty + Assigned Column Numbers ===
-            // Team 2 is already placed and spans multiple rows
-            // Just need column 2 and the numbers
+            // === ROW 3: Only show if numbers are assigned ===
+            if (gameState.numbersAssigned) {
+                const spacer3 = document.createElement('div');
+                spacer3.className = 'number-cell';
+                spacer3.style.background = '#0f172a';
+                grid.appendChild(spacer3);
 
-            const spacer3 = document.createElement('div');
-            spacer3.className = 'number-cell';
-            spacer3.style.background = '#0f172a';
-            grid.appendChild(spacer3);
-
-            for (let col = 0; col < 10; col++) {
-                const numCell = document.createElement('div');
-                numCell.className = 'number-cell';
-                numCell.textContent = gameState.numbersAssigned ? gameState.colNumbers[col] : '';
-                grid.appendChild(numCell);
+                for (let col = 0; col < 10; col++) {
+                    const numCell = document.createElement('div');
+                    numCell.className = 'number-cell';
+                    numCell.textContent = gameState.colNumbers[col];
+                    grid.appendChild(numCell);
+                }
             }
 
-            // === ROWS 4-13: Row Label + Row Number + 10 Squares ===
+            // === ROWS 4-13: Row Label + (Number if assigned) + 10 Squares ===
             for (let row = 0; row < 10; row++) {
                 // Row number label (1-10)
                 const rowLabel = document.createElement('div');
@@ -529,11 +540,13 @@
                 rowLabel.textContent = row + 1;
                 grid.appendChild(rowLabel);
 
-                // Assigned row number
-                const numCell = document.createElement('div');
-                numCell.className = 'number-cell';
-                numCell.textContent = gameState.numbersAssigned ? gameState.rowNumbers[row] : '';
-                grid.appendChild(numCell);
+                // Assigned row number (only if numbers assigned)
+                if (gameState.numbersAssigned) {
+                    const numCell = document.createElement('div');
+                    numCell.className = 'number-cell';
+                    numCell.textContent = gameState.rowNumbers[row];
+                    grid.appendChild(numCell);
+                }
 
                 // 10 squares
                 for (let col = 0; col < 10; col++) {
