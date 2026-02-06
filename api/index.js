@@ -1,4 +1,4 @@
-import { kv } from '@vercel/kv';
+const { kv } = require('@vercel/kv');
 
 const GAME_KEY = 'superbowl-game-state';
 
@@ -37,7 +37,7 @@ function shuffle(array) {
     return arr;
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
@@ -129,15 +129,4 @@ export default async function handler(req, res) {
     }
 
     return res.status(405).json({ error: 'Method not allowed' });
-}
-Step 3: Update package.json
-Add this to your package.json:
-
-{
-  "name": "squares",
-  "version": "1.0.0",
-  "type": "module",
-  "dependencies": {
-    "@vercel/kv": "^1.0.0"
-  }
-}
+};
