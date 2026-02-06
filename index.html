@@ -542,32 +542,43 @@
                 grid.appendChild(colLabel);
             }
 
-            // === ROW 3: Only show if numbers are assigned ===
+            // === ROW 3: Column numbers (only if numbers are assigned) ===
             if (gameState.numbersAssigned) {
-                const spacer3 = document.createElement('div');
-                spacer3.className = 'number-cell';
-                spacer3.style.background = '#0f172a';
-                spacer3.style.gridColumn = '2';
-                spacer3.style.gridRow = '3';
-                grid.appendChild(spacer3);
+                // Empty spacer at column 1
+                const spacer3a = document.createElement('div');
+                spacer3a.className = 'team-label';
+                spacer3a.style.background = '#0f172a';
+                spacer3a.style.gridColumn = '1';
+                spacer3a.style.gridRow = '3';
+                grid.appendChild(spacer3a);
 
+                // Empty spacer at column 2
+                const spacer3b = document.createElement('div');
+                spacer3b.className = 'number-cell';
+                spacer3b.style.background = '#0f172a';
+                spacer3b.style.gridColumn = '2';
+                spacer3b.style.gridRow = '3';
+                grid.appendChild(spacer3b);
+
+                // Column numbers in columns 3-12
                 for (let col = 0; col < 10; col++) {
                     const numCell = document.createElement('div');
                     numCell.className = 'number-cell';
                     numCell.textContent = gameState.colNumbers[col];
                     numCell.style.gridColumn = (col + 3).toString();
                     numCell.style.gridRow = '3';
+                    numCell.style.background = '#cbd5e1';
                     grid.appendChild(numCell);
                 }
             }
 
-            // === ROWS 3-12: Each row has Row Label + (Number if assigned) + 10 Squares ===
+            // === ROWS 4-13 (when numbers assigned) or 3-12 (when not assigned) ===
             const startRow = gameState.numbersAssigned ? 4 : 3;
             
             for (let row = 0; row < 10; row++) {
                 const gridRow = startRow + row;
                 
-                // Row number label (1-10) - always in column 1
+                // COLUMN 1: Row number label (1-10)
                 const rowLabel = document.createElement('div');
                 rowLabel.className = 'team-label';
                 rowLabel.textContent = row + 1;
@@ -575,20 +586,19 @@
                 rowLabel.style.gridRow = gridRow.toString();
                 grid.appendChild(rowLabel);
 
-                // Assigned row number (only if numbers assigned) - in column 2
+                // COLUMN 2: Assigned row number (only if numbers assigned)
                 if (gameState.numbersAssigned) {
                     const numCell = document.createElement('div');
                     numCell.className = 'number-cell';
                     numCell.textContent = gameState.rowNumbers[row];
                     numCell.style.gridColumn = '2';
                     numCell.style.gridRow = gridRow.toString();
+                    numCell.style.background = '#cbd5e1';
                     console.log(`Adding row number ${gameState.rowNumbers[row]} at row ${gridRow}, col 2`);
                     grid.appendChild(numCell);
                 }
 
-                // 10 squares - columns start at 2 (or 3 if numbers assigned)
-                const startCol = gameState.numbersAssigned ? 3 : 2;
-                
+                // COLUMNS 3-12 (or 2-11 if no numbers): 10 squares
                 for (let col = 0; col < 10; col++) {
                     const index = row * 10 + col;
                     const square = document.createElement('div');
@@ -601,7 +611,10 @@
                     }
                     
                     square.onclick = () => claimSquare(index);
-                    square.style.gridColumn = (startCol + col).toString();
+                    
+                    // Place in correct column
+                    const squareCol = gameState.numbersAssigned ? (col + 3) : (col + 2);
+                    square.style.gridColumn = squareCol.toString();
                     square.style.gridRow = gridRow.toString();
                     
                     grid.appendChild(square);
