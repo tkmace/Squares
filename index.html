@@ -408,13 +408,8 @@
 <body>
     <div class="container">
         <h1>🏈 Super Bowl Squares</h1>
-        
-        <div style="text-align: center; margin-bottom: 20px;">
-            <div style="display: inline-block; padding: 10px 20px; background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 8px;">
-                <strong style="color: #1e3a8a;">Game ID:</strong> 
-                <span id="gameId" style="font-family: monospace; font-size: 18px; color: #059669;">LOADING...</span>
-            </div>
-        </div>
+
+        <div id="error-message" class="error" style="display: none;"></div>
         <div id="gameIdDisplay" style="text-align: center; color: #64748b; font-size: 14px; margin-bottom: 15px;">
             Game ID: <span id="gameId" style="font-family: monospace; font-weight: 600;">Loading...</span>
         </div>
@@ -465,6 +460,9 @@
                 2. Once all squares are claimed, numbers AND team positions will be randomly assigned<br>
                 3. Winners determined by the last digit of each team's score at end of each quarter
             </p>
+            <p style="color: #dc2626; font-size: 14px; margin-top: 10px;">
+                <strong>💡 Tip:</strong> Have ONE person manage team names and scores as the "admin" to avoid conflicts.
+            </p>
         </div>
 
         <div class="grid-wrapper">
@@ -500,12 +498,6 @@
                 
                 gameState = await response.json();
                 console.log('Loaded game state:', gameState);
-                
-                // Display game ID
-                const gameIdDisplay = document.getElementById('gameId');
-                if (gameIdDisplay && gameState.gameId) {
-                    gameIdDisplay.textContent = gameState.gameId.split('-')[1] || gameState.gameId;
-                }
                 
                 // Only update team name inputs if they're not currently being edited
                 const team1Input = document.getElementById('team1Name');
