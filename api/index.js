@@ -99,6 +99,17 @@ module.exports = (req, res) => {
                 };
                 return res.status(200).json(gameState);
 
+            case 'erase':
+                if (index < 0 || index > 99) {
+                    return res.status(400).json({ error: 'Invalid square index' });
+                }
+                gameState.squares[index] = null;
+                return res.status(200).json(gameState);
+
+            case 'clear-board':
+                gameState.squares = Array(100).fill(null);
+                return res.status(200).json(gameState);
+
             default:
                 return res.status(400).json({ error: 'Invalid action' });
         }

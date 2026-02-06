@@ -399,7 +399,7 @@
         <div class="controls">
             <div class="input-group">
                 <input type="text" id="initialsInput" placeholder="Your initials" maxlength="4">
-                <button id="claimBtn" onclick="enableClaimMode()">Claim Square</button>
+                <button id="claimBtn" onclick="enableClaimMode()">Claim Squares</button>
                 <button id="doneBtn" onclick="disableClaimMode()" style="display: none; background: #10b981;">Done</button>
             </div>
             
@@ -423,6 +423,9 @@
                 </div>
                 <button onclick="saveTeamNames()" class="success">Save Team Names</button>
                 <button id="assignNumbersBtn" onclick="assignNumbers()" disabled>Randomize Numbers</button>
+                <button onclick="enableEraseMode()" style="background: #f59e0b;" id="eraseBtn">Erase Squares</button>
+                <button onclick="disableEraseMode()" style="display: none; background: #10b981;" id="doneEraseBtn">Done Erasing</button>
+                <button onclick="clearBoard()" style="background: #dc3545;">Clear Board</button>
                 <button class="danger" onclick="resetGame()">Reset Game</button>
             </div>
         </div>
@@ -452,6 +455,7 @@
         const API_URL = '/api';
         let gameState = null;
         let claimingMode = false;
+        let eraseMode = false;
         let currentInitials = '';
 
         async function loadGameState() {
@@ -648,14 +652,56 @@
             updateStatus();
         }
 
+        function enableEraseMode() {
+            eraseMode = true;
+            claimingMode = false; // Can't claim and erase at same time
+            document.getElementById('eraseBtn').style.display = 'none';
+            document.getElementById('doneEraseBtn').style.display = 'inline-block';
+            updateStatus();
+        }
+
+        function disableEraseMode() {
+            eraseMode = false;
+            document.getElementById('eraseBtn').style.display = 'inline-block';
+            document.getElementById('doneEraseBtn').style.display = 'none';
+            updateStatus();
+        }
+
         async function claimSquare(index) {
+            // Handle erase mode
+            if (eraseMode) {
+                if (!gameState.squares[index]) {
+                    alert('Square is already empty!');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'erase', index })
+                    });
+
+                    if (!response.ok) throw new Error('Erase failed');
+                    
+                    gameState = await response.json();
+                    renderGrid();
+                    updateStatus();
+                } catch (error) {
+                    showError('Failed to erase square');
+                    console.error(error);
+                }
+                return;
+            }
+
+            // Handle claim mode
             if (gameState.squares[index]) {
                 alert('Already claimed!');
                 return;
             }
 
             if (!claimingMode) {
-                alert('Click "Claim Square" first!');
+                alert('Click "Claim Squares" first!');
                 return;
             }
 
@@ -839,12 +885,37 @@
             }
         }
 
+        async function clearBoard() {
+            if (!confirm('Clear all claimed squares? This will keep team names and numbers but remove all initials.')) return;
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'clear-board' })
+                });
+
+                if (!response.ok) throw new Error('Failed');
+                
+                gameState = await response.json();
+                renderGrid();
+                updateStatus();
+            } catch (error) {
+                showError('Failed to clear board');
+                console.error(error);
+            }
+        }
+
         function updateStatus() {
             const claimed = gameState.squares.filter(s => s !== null).length;
             const status = document.getElementById('status');
             const allClaimed = claimed === 100;
 
-            if (claimingMode) {
+            if (eraseMode) {
+                status.textContent = `Erase mode active - Click any claimed square to erase it`;
+                status.style.background = '#fed7aa';
+                status.style.color = '#9a3412';
+            } else if (claimingMode) {
                 status.textContent = `Claiming as "${currentInitials}" - Click any empty square`;
                 status.style.background = '#fef3c7';
                 status.style.color = '#92400e';
