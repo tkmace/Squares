@@ -150,12 +150,12 @@
         .grid {
             display: grid;
             grid-template-columns: 40px repeat(10, 70px);
-            grid-template-rows: 40px 40px repeat(10, 70px);
+            grid-template-rows: 40px repeat(10, 70px);
         }
 
         .grid.numbers-assigned {
             grid-template-columns: 40px 60px repeat(10, 70px);
-            grid-template-rows: 40px 40px 60px repeat(10, 70px);
+            grid-template-rows: 40px 60px repeat(10, 70px);
         }
 
         .team-header {
@@ -390,11 +390,11 @@
         @media (max-width: 768px) {
             .grid {
                 grid-template-columns: 40px repeat(10, 50px);
-                grid-template-rows: 40px 40px repeat(10, 50px);
+                grid-template-rows: 40px repeat(10, 50px);
             }
             .grid.numbers-assigned {
                 grid-template-columns: 40px 50px repeat(10, 50px);
-                grid-template-rows: 40px 40px 50px repeat(10, 50px);
+                grid-template-rows: 40px 50px repeat(10, 50px);
             }
             .square {
                 font-size: 14px;
@@ -407,11 +407,14 @@
 </head>
 <body>
     <div class="container">
-        <h1>🏈 Super Bowl Squares</h1>
-
-        <div id="error-message" class="error" style="display: none;"></div>
-        <div id="gameIdDisplay" style="text-align: center; color: #64748b; font-size: 14px; margin-bottom: 15px;">
-            Game ID: <span id="gameId" style="font-family: monospace; font-weight: 600;">Loading...</span>
+        <h1>🏈 Haller Lake Super Bowl!</h1>
+        <h2 style="text-align: center; color: #1e3a8a; margin-top: -10px; margin-bottom: 5px; font-size: 24px;">
+            <span style="color: #002244;">🔴⚪🔵 Patriots</span> 
+            <span style="margin: 0 10px;">vs</span> 
+            <span style="color: #002244;">🟢🔵 Seahawks</span>
+        </h2>
+        <div style="text-align: center; margin-bottom: 20px; color: #64748b; font-size: 14px;">
+            New England Patriots vs Seattle Seahawks
         </div>
 
         <div id="error-message" class="error" style="display: none;"></div>
@@ -559,14 +562,14 @@
 
             const team1Header = document.createElement('div');
             team1Header.className = 'team-header top';
-            team1Header.textContent = gameState.team1Name;
+            team1Header.textContent = gameState.numbersAssigned ? gameState.team1Name : 'Team 1';
             // Will span based on CSS
             grid.appendChild(team1Header);
 
             // === ROW 2: Team 2 header + Column Letters A-J ===
             const team2Header = document.createElement('div');
             team2Header.className = 'team-header left';
-            team2Header.textContent = gameState.team2Name;
+            team2Header.textContent = gameState.numbersAssigned ? gameState.team2Name : 'Team 2';
             // Will span based on CSS
             grid.appendChild(team2Header);
 
@@ -580,28 +583,14 @@
                 grid.appendChild(spacer2);
             }
 
-            // Column labels A-J
-            for (let col = 0; col < 10; col++) {
-                const colLabel = document.createElement('div');
-                colLabel.className = 'team-label';
-                colLabel.textContent = columnLabels[col];
-                if (gameState.numbersAssigned) {
-                    colLabel.style.gridColumn = (col + 3).toString();
-                } else {
-                    colLabel.style.gridColumn = (col + 2).toString();
-                }
-                colLabel.style.gridRow = '2';
-                grid.appendChild(colLabel);
-            }
-
-            // === ROW 3: Column numbers (only if numbers are assigned) ===
+            // === ROW 2 or 3: Column numbers (only if numbers are assigned) ===
             if (gameState.numbersAssigned) {
                 // Empty spacer at column 1
                 const spacer3a = document.createElement('div');
                 spacer3a.className = 'team-label';
                 spacer3a.style.background = '#0f172a';
                 spacer3a.style.gridColumn = '1';
-                spacer3a.style.gridRow = '3';
+                spacer3a.style.gridRow = '2';
                 grid.appendChild(spacer3a);
 
                 // Empty spacer at column 2
@@ -609,7 +598,7 @@
                 spacer3b.className = 'number-cell';
                 spacer3b.style.background = '#0f172a';
                 spacer3b.style.gridColumn = '2';
-                spacer3b.style.gridRow = '3';
+                spacer3b.style.gridRow = '2';
                 grid.appendChild(spacer3b);
 
                 // Column numbers in columns 3-12
@@ -618,14 +607,14 @@
                     numCell.className = 'number-cell';
                     numCell.textContent = gameState.colNumbers[col];
                     numCell.style.gridColumn = (col + 3).toString();
-                    numCell.style.gridRow = '3';
+                    numCell.style.gridRow = '2';
                     numCell.style.background = '#cbd5e1';
                     grid.appendChild(numCell);
                 }
             }
 
-            // === ROWS 4-13 (when numbers assigned) or 3-12 (when not assigned) ===
-            const startRow = gameState.numbersAssigned ? 4 : 3;
+            // === ROWS 3-12 (when numbers assigned) or 2-11 (when not assigned) ===
+            const startRow = gameState.numbersAssigned ? 3 : 2;
             
             for (let row = 0; row < 10; row++) {
                 const gridRow = startRow + row;
@@ -887,7 +876,7 @@
                         <label>${gameState.team2Name}:</label>
                         <input type="number" id="team2-q${i}" min="0" max="99" value="${scores.team2}" placeholder="0">
                     </div>
-                    <button onclick="calculateWinner(${i})">Calculate Winner</button>
+                    <button onclick="calculateWinner(${i})">Display Winner</button>
                     <div id="winner-q${i}"></div>
                 `;
                 
