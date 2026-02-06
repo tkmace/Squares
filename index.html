@@ -131,6 +131,14 @@
             justify-content: center;
             margin: 30px 0;
             overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        @media (max-width: 768px) {
+            .grid-wrapper {
+                justify-content: flex-start;
+                padding: 10px;
+            }
         }
 
         .grid-container {
@@ -706,15 +714,23 @@
             }
 
             try {
+                console.log('Claiming square:', index, 'with initials:', currentInitials);
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'claim', index, initials: currentInitials })
                 });
 
-                if (!response.ok) throw new Error('Claim failed');
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('API Error:', errorData);
+                    throw new Error('Claim failed: ' + (errorData.error || response.status));
+                }
                 
                 gameState = await response.json();
+                console.log('Claim successful, new state:', gameState);
                 // DON'T turn off claiming mode - keep it active for multiple claims
                 // claimingMode = false;
                 
@@ -727,7 +743,7 @@
                 renderGrid();
                 updateStatus();
             } catch (error) {
-                showError('Failed to claim square');
+                showError('Failed to claim square: ' + error.message);
                 console.error(error);
             }
         }
