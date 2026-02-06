@@ -441,7 +441,11 @@
                         <input type="text" id="team2Name" placeholder="Team 2">
                     </div>
                 </div>
-                <button onclick="saveTeamNames()" class="success">Save Team Names</button>
+                <div style="margin: 15px 0;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #1e3a8a;">Price Per Square ($)</label>
+                    <input type="number" id="pricePerSquare" min="0" step="1" placeholder="5" style="width: 100px; padding: 8px; border: 2px solid #cbd5e1; border-radius: 6px; font-size: 16px;">
+                </div>
+                <button onclick="saveSettings()" class="success">Save Settings</button>
                 <button id="assignNumbersBtn" onclick="assignNumbers()" disabled>Randomize Numbers & Teams</button>
                 <button onclick="enableEraseMode()" style="background: #f59e0b;" id="eraseBtn">Erase Square</button>
                 <button onclick="disableEraseMode()" style="display: none; background: #10b981;" id="doneEraseBtn">Done Erasing</button>
@@ -455,7 +459,7 @@
         <div class="info-section" style="margin-top: 0; margin-bottom: 25px;">
             <h2>Instructions</h2>
             <p style="color: #475569; line-height: 1.6;">
-                <strong>$5 per square, collected at the party.</strong><br>
+                <strong id="priceDisplay">$5 per square, collected at the party.</strong><br>
                 1. Enter your initials and click "Claim Squares" to pick your squares<br>
                 2. Once all squares are claimed, numbers AND team positions will be randomly assigned<br>
                 3. Winners determined by the last digit of each team's score at end of each quarter
@@ -499,15 +503,25 @@
                 gameState = await response.json();
                 console.log('Loaded game state:', gameState);
                 
-                // Only update team name inputs if they're not currently being edited
+                // Update price display
+                const priceDisplay = document.getElementById('priceDisplay');
+                if (priceDisplay) {
+                    priceDisplay.textContent = `$${gameState.pricePerSquare || 5} per square, collected at the party.`;
+                }
+                
+                // Only update inputs if they're not currently being edited
                 const team1Input = document.getElementById('team1Name');
                 const team2Input = document.getElementById('team2Name');
+                const priceInput = document.getElementById('pricePerSquare');
                 
                 if (document.activeElement !== team1Input) {
                     team1Input.value = gameState.team1Name || 'Team 1';
                 }
                 if (document.activeElement !== team2Input) {
                     team2Input.value = gameState.team2Name || 'Team 2';
+                }
+                if (document.activeElement !== priceInput && priceInput) {
+                    priceInput.value = gameState.pricePerSquare || 5;
                 }
                 
                 renderGrid();
@@ -809,24 +823,37 @@
             }
         }
 
-        async function saveTeamNames() {
+        async function saveSettings() {
             const team1Name = document.getElementById('team1Name').value.trim() || 'Team 1';
             const team2Name = document.getElementById('team2Name').value.trim() || 'Team 2';
+            const price = parseInt(document.getElementById('pricePerSquare').value) || 5;
 
             try {
-                const response = await fetch(API_URL, {
+                // Save team names
+                let response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'update-teams', team1Name, team2Name })
                 });
-
-                if (!response.ok) throw new Error('Failed');
+                if (!response.ok) throw new Error('Failed to save teams');
+                
+                // Save price
+                response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'update-price', price })
+                });
+                if (!response.ok) throw new Error('Failed to save price');
                 
                 gameState = await response.json();
                 renderGrid();
-                alert('Saved!');
+                
+                // Update price display
+                document.getElementById('priceDisplay').textContent = `$${price} per square, collected at the party.`;
+                
+                alert('Settings saved!');
             } catch (error) {
-                showError('Failed to save');
+                showError('Failed to save settings');
                 console.error(error);
             }
         }

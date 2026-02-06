@@ -8,6 +8,7 @@ let gameState = {
     numbersAssigned: false,
     team1Name: 'Team 1',
     team2Name: 'Team 2',
+    pricePerSquare: 5,
     quarterScores: [
         { team1: '', team2: '' },
         { team1: '', team2: '' },
@@ -78,6 +79,13 @@ module.exports = (req, res) => {
             case 'update-teams':
                 if (team1Name) gameState.team1Name = team1Name;
                 if (team2Name) gameState.team2Name = team2Name;
+                return res.status(200).json(gameState);
+
+            case 'update-price':
+                const { price } = req.body;
+                if (price !== undefined && price >= 0) {
+                    gameState.pricePerSquare = price;
+                }
                 return res.status(200).json(gameState);
 
             case 'set-score':
