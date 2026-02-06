@@ -8,7 +8,7 @@ let gameState = {
     numbersAssigned: false,
     team1Name: 'Team 1',
     team2Name: 'Team 2',
-    pricePerSquare: 5,
+    pricePerSquare: 2,
     quarterScores: [
         { team1: '', team2: '' },
         { team1: '', team2: '' },
@@ -117,6 +117,7 @@ module.exports = (req, res) => {
                     numbersAssigned: false,
                     team1Name: gameState.team1Name,
                     team2Name: gameState.team2Name,
+                    pricePerSquare: gameState.pricePerSquare || 2,
                     quarterScores: [
                         { team1: '', team2: '' },
                         { team1: '', team2: '' },
