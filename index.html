@@ -489,8 +489,16 @@
                 gameState = await response.json();
                 console.log('Loaded game state:', gameState);
                 
-                document.getElementById('team1Name').value = gameState.team1Name || 'Team 1';
-                document.getElementById('team2Name').value = gameState.team2Name || 'Team 2';
+                // Only update team name inputs if they're not currently being edited
+                const team1Input = document.getElementById('team1Name');
+                const team2Input = document.getElementById('team2Name');
+                
+                if (document.activeElement !== team1Input) {
+                    team1Input.value = gameState.team1Name || 'Team 1';
+                }
+                if (document.activeElement !== team2Input) {
+                    team2Input.value = gameState.team2Name || 'Team 2';
+                }
                 
                 renderGrid();
                 updateStatus();
