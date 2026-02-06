@@ -1,18 +1,32 @@
-// API endpoint for Super Bowl Squares
-let gameState = {
-    squares: Array(100).fill(null),
-    rowNumbers: [],
-    colNumbers: [],
-    numbersAssigned: false,
-    team1Name: 'Team 1',
-    team2Name: 'Team 2',
-    quarterScores: [
-        { team1: '', team2: '' },
-        { team1: '', team2: '' },
-        { team1: '', team2: '' },
-        { team1: '', team2: '' }
-    ]
-};
+import { kv } from '@vercel/kv';
+
+const GAME_KEY = 'superbowl-game-state';
+
+async function getGameState() {
+    const state = await kv.get(GAME_KEY);
+    if (!state) {
+        return {
+            squares: Array(100).fill(null),
+            rowNumbers: [],
+            colNumbers: [],
+            numbersAssigned: false,
+            team1Name: 'Team 1',
+            team2Name: 'Team 2',
+            quarterScores: [
+                { team1: '', team2: '' },
+                { team1: '', team2: '' },
+                { team1: '', team2: '' },
+                { team1: '', team2: '' }
+            ]
+        };
+    }
+    return state;
+}
+
+async function saveGameState(state) {
+    await kv.set(GAME_KEY, state);
+    return state;
+}
 
 function shuffle(array) {
     const arr = [...array];
@@ -23,8 +37,7 @@ function shuffle(array) {
     return arr;
 }
 
-module.exports = (req, res) => {
-    // Enable CORS
+export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
@@ -34,13 +47,13 @@ module.exports = (req, res) => {
         return res.status(200).end();
     }
 
-    // GET - Return game state
     if (req.method === 'GET') {
+        const gameState = await getGameState();
         return res.status(200).json(gameState);
     }
 
-    // POST - Handle all actions
     if (req.method === 'POST') {
+        const gameState = await getGameState();
         const { action, index, initials, team1Name, team2Name, quarter, team1Score, team2Score } = req.body;
 
         switch (action) {
@@ -55,7 +68,7 @@ module.exports = (req, res) => {
                     return res.status(400).json({ error: 'Square already claimed' });
                 }
                 gameState.squares[index] = initials.toUpperCase();
-                return res.status(200).json(gameState);
+                return res.status(200).json(await saveGameState(gameState));
 
             case 'assign-numbers':
                 const claimed = gameState.squares.filter(s => s !== null).length;
@@ -65,12 +78,12 @@ module.exports = (req, res) => {
                 gameState.rowNumbers = shuffle([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
                 gameState.colNumbers = shuffle([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
                 gameState.numbersAssigned = true;
-                return res.status(200).json(gameState);
+                return res.status(200).json(await saveGameState(gameState));
 
             case 'update-teams':
                 if (team1Name) gameState.team1Name = team1Name;
                 if (team2Name) gameState.team2Name = team2Name;
-                return res.status(200).json(gameState);
+                return res.status(200).json(await saveGameState(gameState));
 
             case 'set-score':
                 if (quarter < 0 || quarter > 3) {
@@ -80,10 +93,21 @@ module.exports = (req, res) => {
                     team1: team1Score,
                     team2: team2Score
                 };
-                return res.status(200).json(gameState);
+                return res.status(200).json(await saveGameState(gameState));
+
+            case 'erase':
+                if (index < 0 || index > 99) {
+                    return res.status(400).json({ error: 'Invalid square index' });
+                }
+                gameState.squares[index] = null;
+                return res.status(200).json(await saveGameState(gameState));
+
+            case 'clear-board':
+                gameState.squares = Array(100).fill(null);
+                return res.status(200).json(await saveGameState(gameState));
 
             case 'reset':
-                gameState = {
+                const resetState = {
                     squares: Array(100).fill(null),
                     rowNumbers: [],
                     colNumbers: [],
@@ -97,18 +121,7 @@ module.exports = (req, res) => {
                         { team1: '', team2: '' }
                     ]
                 };
-                return res.status(200).json(gameState);
-
-            case 'erase':
-                if (index < 0 || index > 99) {
-                    return res.status(400).json({ error: 'Invalid square index' });
-                }
-                gameState.squares[index] = null;
-                return res.status(200).json(gameState);
-
-            case 'clear-board':
-                gameState.squares = Array(100).fill(null);
-                return res.status(200).json(gameState);
+                return res.status(200).json(await saveGameState(resetState));
 
             default:
                 return res.status(400).json({ error: 'Invalid action' });
@@ -116,4 +129,15 @@ module.exports = (req, res) => {
     }
 
     return res.status(405).json({ error: 'Method not allowed' });
-};
+}
+Step 3: Update package.json
+Add this to your package.json:
+
+{
+  "name": "squares",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@vercel/kv": "^1.0.0"
+  }
+}
