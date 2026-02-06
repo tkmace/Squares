@@ -292,6 +292,13 @@
             margin: 0;
         }
 
+        @media (max-width: 768px) {
+            .team-inputs {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
         .team-input-group {
             display: flex;
             flex-direction: column;
@@ -421,16 +428,16 @@
             <div class="admin-content">
                 <div class="team-inputs">
                     <div class="team-input-group">
-                        <label>Team 1 (Top)</label>
+                        <label>Team 1</label>
                         <input type="text" id="team1Name" placeholder="Team 1">
                     </div>
                     <div class="team-input-group">
-                        <label>Team 2 (Left)</label>
+                        <label>Team 2</label>
                         <input type="text" id="team2Name" placeholder="Team 2">
                     </div>
                 </div>
                 <button onclick="saveTeamNames()" class="success">Save Team Names</button>
-                <button id="assignNumbersBtn" onclick="assignNumbers()" disabled>Randomize Numbers</button>
+                <button id="assignNumbersBtn" onclick="assignNumbers()" disabled>Randomize Numbers & Teams</button>
                 <button onclick="enableEraseMode()" style="background: #f59e0b;" id="eraseBtn">Erase Squares</button>
                 <button onclick="disableEraseMode()" style="display: none; background: #10b981;" id="doneEraseBtn">Done Erasing</button>
                 <button onclick="clearBoard()" style="background: #dc3545;">Clear Board</button>
@@ -444,8 +451,8 @@
             <h2>Instructions</h2>
             <p style="color: #475569; line-height: 1.6;">
                 <strong>$5 per square, collected at the party.</strong><br>
-                1. Enter your initials and click "Claim Square" to pick your squares<br>
-                2. Once all squares are claimed, numbers will be assigned<br>
+                1. Enter your initials and click "Claim Squares" to pick your squares<br>
+                2. Once all squares are claimed, numbers AND team positions will be randomly assigned<br>
                 3. Winners determined by the last digit of each team's score at end of each quarter
             </p>
         </div>
@@ -749,7 +756,7 @@
         }
 
         async function assignNumbers() {
-            if (!confirm('Assign random numbers?')) return;
+            if (!confirm('This will randomly assign numbers 0-9 AND randomly assign teams to the top/left axes. Continue?')) return;
 
             try {
                 const response = await fetch(API_URL, {
