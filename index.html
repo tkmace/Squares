@@ -408,6 +408,16 @@
 <body>
     <div class="container">
         <h1>🏈 Super Bowl Squares</h1>
+        
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div style="display: inline-block; padding: 10px 20px; background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 8px;">
+                <strong style="color: #1e3a8a;">Game ID:</strong> 
+                <span id="gameId" style="font-family: monospace; font-size: 18px; color: #059669;">LOADING...</span>
+            </div>
+        </div>
+        <div id="gameIdDisplay" style="text-align: center; color: #64748b; font-size: 14px; margin-bottom: 15px;">
+            Game ID: <span id="gameId" style="font-family: monospace; font-weight: 600;">Loading...</span>
+        </div>
 
         <div id="error-message" class="error" style="display: none;"></div>
 
@@ -472,6 +482,8 @@
         let claimingMode = false;
         let eraseMode = false;
         let currentInitials = '';
+        let autoRefreshInterval = null;
+        let isAdminMode = false;
 
         async function loadGameState() {
             try {
@@ -488,6 +500,12 @@
                 
                 gameState = await response.json();
                 console.log('Loaded game state:', gameState);
+                
+                // Display game ID
+                const gameIdDisplay = document.getElementById('gameId');
+                if (gameIdDisplay && gameState.gameId) {
+                    gameIdDisplay.textContent = gameState.gameId.split('-')[1] || gameState.gameId;
+                }
                 
                 // Only update team name inputs if they're not currently being edited
                 const team1Input = document.getElementById('team1Name');
@@ -653,7 +671,20 @@
         function toggleAdminMode() {
             const checkbox = document.getElementById('adminMode');
             const adminControls = document.getElementById('adminControls');
-            adminControls.style.display = checkbox.checked ? 'block' : 'none';
+            isAdminMode = checkbox.checked;
+            adminControls.style.display = isAdminMode ? 'block' : 'none';
+            
+            // Pause auto-refresh when admin mode is active
+            if (isAdminMode) {
+                console.log('Admin mode ON - Auto-refresh PAUSED');
+                if (autoRefreshInterval) {
+                    clearInterval(autoRefreshInterval);
+                    autoRefreshInterval = null;
+                }
+            } else {
+                console.log('Admin mode OFF - Auto-refresh RESUMED');
+                startAutoRefresh();
+            }
         }
 
         function enableClaimMode() {
@@ -809,6 +840,13 @@
         }
 
         function renderQuarters() {
+            // Don't re-render quarters if a score input is focused (user is typing)
+            const focusedElement = document.activeElement;
+            if (focusedElement && focusedElement.id && focusedElement.id.match(/^team[12]-q[0-3]$/)) {
+                console.log('Skipping quarter render - user is editing scores');
+                return;
+            }
+            
             const quarters = document.getElementById('quarters');
             quarters.innerHTML = '<h2 style="grid-column: 1/-1; color: #1e3a8a; margin: 20px 0;">Quarter Scores</h2>';
 
@@ -969,7 +1007,22 @@
             setTimeout(() => errorDiv.style.display = 'none', 5000);
         }
 
-        setInterval(loadGameState, 10000);
+        function startAutoRefresh() {
+            // Clear any existing interval
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+            // Start new interval
+            autoRefreshInterval = setInterval(() => {
+                // Don't auto-refresh if admin mode is active
+                if (!isAdminMode) {
+                    loadGameState();
+                }
+            }, 10000);
+        }
+
+        // Initialize
+        startAutoRefresh();
         loadGameState();
     </script>
 </body>

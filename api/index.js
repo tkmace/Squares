@@ -2,6 +2,7 @@
 // For production with Vercel KV, see api/index-with-kv.js.backup
 
 let gameState = {
+    gameId: 'superbowl-' + Date.now(), // Unique game ID
     squares: Array(100).fill(null),
     rowNumbers: [],
     colNumbers: [],
