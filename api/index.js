@@ -1,4 +1,6 @@
-const { kv } = require('@vercel/kv');
+const { Redis } = require('@upstash/redis');
+
+const kv = Redis.fromEnv(); 
 
 const GAME_KEY = 'superbowl-game-state';
 
