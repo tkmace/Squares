@@ -437,11 +437,11 @@
                 <div class="team-inputs">
                     <div class="team-input-group">
                         <label>Team 1</label>
-                        <input type="text" id="team1Name" placeholder="Team 1">
+                        <input type="text" id="team1Name" placeholder="Patriots">
                     </div>
                     <div class="team-input-group">
                         <label>Team 2</label>
-                        <input type="text" id="team2Name" placeholder="Team 2">
+                        <input type="text" id="team2Name" placeholder="Seahawks">
                     </div>
                 </div>
                 <div style="margin: 15px 0;">
@@ -464,7 +464,7 @@
             <p style="color: #475569; line-height: 1.6;">
                 <strong id="priceDisplay">$2 per square, collected at the party.</strong><br>
                 1. Enter your initials and click "Claim Squares" to pick your squares<br>
-                2. Once all squares are claimed, digits in each row/column AND team positions will be randomly assigned<br>
+                2. Once all squares are claimed, numbers AND team positions will be randomly assigned<br>
                 3. Winners determined by the last digit of each team's score at end of each quarter<br>
                 4. <strong>Payouts:</strong> <span id="payoutDisplay">Q1: $40, Q2: $40, Q3: $40, Final: $80</span>
             </p>
@@ -535,10 +535,10 @@
                 const priceInput = document.getElementById('pricePerSquare');
                 
                 if (document.activeElement !== team1Input) {
-                    team1Input.value = gameState.team1Name || 'Team 1';
+                    team1Input.value = gameState.team1Name || 'Patriots';
                 }
                 if (document.activeElement !== team2Input) {
-                    team2Input.value = gameState.team2Name || 'Team 2';
+                    team2Input.value = gameState.team2Name || 'Seahawks';
                 }
                 if (document.activeElement !== priceInput && priceInput) {
                     priceInput.value = gameState.pricePerSquare || 2;
@@ -579,14 +579,14 @@
 
             const team1Header = document.createElement('div');
             team1Header.className = 'team-header top';
-            team1Header.textContent = gameState.numbersAssigned ? gameState.team1Name : 'Team 1';
+            team1Header.textContent = gameState.numbersAssigned ? gameState.team1Name : 'Patriots';
             // Will span based on CSS
             grid.appendChild(team1Header);
 
             // === ROW 2: Team 2 header + Column Letters A-J ===
             const team2Header = document.createElement('div');
             team2Header.className = 'team-header left';
-            team2Header.textContent = gameState.numbersAssigned ? gameState.team2Name : 'Team 2';
+            team2Header.textContent = gameState.numbersAssigned ? gameState.team2Name : 'Seahawks';
             // Will span based on CSS
             grid.appendChild(team2Header);
 
@@ -830,8 +830,8 @@
         }
 
         async function saveSettings() {
-            const team1Name = document.getElementById('team1Name').value.trim() || 'Team 1';
-            const team2Name = document.getElementById('team2Name').value.trim() || 'Team 2';
+            const team1Name = document.getElementById('team1Name').value.trim() || 'Patriots';
+            const team2Name = document.getElementById('team2Name').value.trim() || 'Seahawks';
             const price = parseInt(document.getElementById('pricePerSquare').value) || 2;
 
             try {

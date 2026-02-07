@@ -6,8 +6,8 @@ let gameState = {
     rowNumbers: [],
     colNumbers: [],
     numbersAssigned: false,
-    team1Name: 'Team 1',
-    team2Name: 'Team 2',
+    team1Name: 'Patriots',
+    team2Name: 'Seahawks',
     pricePerSquare: 2,
     quarterScores: [
         { team1: '', team2: '' },
