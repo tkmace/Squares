@@ -465,7 +465,11 @@
                 <strong id="priceDisplay">$2 per square, collected at the party.</strong><br>
                 1. Enter your initials and click "Claim Squares" to pick your squares<br>
                 2. Once all squares are claimed, numbers AND team positions will be randomly assigned<br>
-                3. Winners determined by the last digit of each team's score at end of each quarter
+                3. Winners determined by the last digit of each team's score at end of each quarter<br>
+                4. <strong>Payouts:</strong> <span id="payoutDisplay">Q1: $40, Q2: $40, Q3: $40, Final: $80</span>
+            </p>
+            <p style="color: #64748b; font-size: 14px; margin-top: 10px; font-style: italic;">
+                (First 3 quarters: 3/5 of pot split evenly, Final quarter: 2/5 of pot)
             </p>
             <p style="color: #dc2626; font-size: 14px; margin-top: 10px;">
                 <strong>💡 Tip:</strong> Have ONE person manage team names and scores as the "admin" to avoid conflicts.
@@ -490,6 +494,17 @@
         let autoRefreshInterval = null;
         let isAdminMode = false;
 
+        function updatePayoutDisplay(pricePerSquare) {
+            const totalPot = pricePerSquare * 100;
+            const firstThreeQuarters = Math.floor((totalPot * 3) / 5 / 3); // 3/5 split 3 ways
+            const finalQuarter = totalPot - (firstThreeQuarters * 3); // Remaining 2/5
+            
+            const payoutDisplay = document.getElementById('payoutDisplay');
+            if (payoutDisplay) {
+                payoutDisplay.textContent = `Q1: $${firstThreeQuarters}, Q2: $${firstThreeQuarters}, Q3: $${firstThreeQuarters}, Final: $${finalQuarter}`;
+            }
+        }
+
         async function loadGameState() {
             try {
                 console.log('Fetching from:', API_URL);
@@ -509,7 +524,9 @@
                 // Update price display
                 const priceDisplay = document.getElementById('priceDisplay');
                 if (priceDisplay) {
-                    priceDisplay.textContent = `$${gameState.pricePerSquare || 2} per square, collected at the party.`;
+                    const price = gameState.pricePerSquare || 2;
+                    priceDisplay.textContent = `$${price} per square, collected at the party.`;
+                    updatePayoutDisplay(price);
                 }
                 
                 // Only update inputs if they're not currently being edited
@@ -837,8 +854,9 @@
                 gameState = await response.json();
                 renderGrid();
                 
-                // Update price display
+                // Update price display and payouts
                 document.getElementById('priceDisplay').textContent = `$${price} per square, collected at the party.`;
+                updatePayoutDisplay(price);
                 
                 alert('Settings saved!');
             } catch (error) {
